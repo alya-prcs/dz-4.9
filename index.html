@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Контакти</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f8f8f8;
+    }
+    h1 {
+      text-align: center;
+    }
+    form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    input {
+      padding: 8px;
+      flex: 1 1 200px;
+    }
+    button {
+      padding: 8px 15px;
+      cursor: pointer;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background: #eee;
+    }
+    .actions button {
+      margin-right: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Менеджер контактів</h1>
+
+  <form id="contactForm">
+    <input type="hidden" id="contactIndex">
+    <input type="text" id="firstName" placeholder="Ім'я" required>
+    <input type="text" id="lastName" placeholder="Прізвище" required>
+    <input type="tel" id="phone" placeholder="Телефон" required>
+    <input type="email" id="email" placeholder="Email" required>
+    <button type="submit">Зберегти</button>
+  </form>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Ім'я</th>
+        <th>Прізвище</th>
+        <th>Телефон</th>
+        <th>Email</th>
+        <th>Дії</th>
+      </tr>
+    </thead>
+    <tbody id="contactsTable"></tbody>
+  </table>
+
+  <script>
+    const form = document.getElementById("contactForm");
+    const contactsTable = document.getElementById("contactsTable");
+    const firstName = document.getElementById("firstName");
+    const lastName = document.getElementById("lastName");
+    const phone = document.getElementById("phone");
+    const email = document.getElementById("email");
+    const contactIndex = document.getElementById("contactIndex");
+
+    let contacts = JSON.parse(localStorage.getItem("contacts")) || [];
+
+    function renderContacts() {
+      contactsTable.innerHTML = "";
+      contacts.forEach((contact, index) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${contact.firstName}</td>
+          <td>${contact.lastName}</td>
+          <td>${contact.phone}</td>
+          <td>${contact.email}</td>
+          <td class="actions">
+            <button onclick="editContact(${index})">✏️</button>
+            <button onclick="deleteContact(${index})">🗑️</button>
+          </td>
+        `;
+        contactsTable.appendChild(row);
+      });
+    }
+
+    function saveContacts() {
+      localStorage.setItem("contacts", JSON.stringify(contacts));
+    }
+
+    form.addEventListener("submit", function(e) {
+      e.preventDefault();
+      const contact = {
+        firstName: firstName.value,
+        lastName: lastName.value,
+        phone: phone.value,
+        email: email.value
+      };
+
+      if (contactIndex.value === "") {
+        contacts.push(contact);
+      } else {
+        contacts[contactIndex.value] = contact;
+        contactIndex.value = "";
+      }
+
+      saveContacts();
+      renderContacts();
+      form.reset();
+    });
+
+    function editContact(index) {
+      const contact = contacts[index];
+      firstName.value = contact.firstName;
+      lastName.value = contact.lastName;
+      phone.value = contact.phone;
+      email.value = contact.email;
+      contactIndex.value = index;
+    }
+
+    function deleteContact(index) {
+      contacts.splice(index, 1);
+      saveContacts();
+      renderContacts();
+    }
+
+    // Показати контакти при завантаженні
+    renderContacts();
+  </script>
+</body>
+</html>
